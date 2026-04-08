@@ -1,0 +1,23 @@
+{
+  "chats": [
+    {
+      "id": "291e84b02a1d",
+      "user_id": "2bacb41b66",
+      "timestamp": "2026-04-08T20:28:42.630359",
+      "message": "How do I return an item?",
+      "response": "I'd be happy to help with your return! Our return policy allows returns within 30 days of delivery. Items must be unused and in their original packaging with all tags attached.\n\nTo start a return, please:\n1. Fill out our online return form (I can provide the link)\n2. Pack the item securely with the original receipt or order number\n3. Use the prepaid return label that will be emailed to you\n\nOnce we receive and inspect the item, your refund will be processed within 5-7 business days.\n\nCould you please provide your order number so I can check if your item is eligible for return and send you the specific return form?",
+      "language": "en",
+      "length": 645
+    },
+    {
+      "id": "73d5eb094243",
+      "user_id": "2bacb41b66",
+      "timestamp": "2026-04-08T20:28:52.687655",
+      "message": "What's your shipping policy?",
+      "response": "Our shipping policy offers several options to meet your needs:\n\n**DOMESTIC SHIPPING (US):**\n- Standard: 5-7 business days - $5.99\n- Express: 2-3 business days - $12.99\n- Overnight: 1 business day - $24.99 (order by 2 PM EST)\n\n**INTERNATIONAL SHIPPING:**\n- Canada/Mexico: 7-10 business days - $14.99\n- Europe: 8-12 business days - $19.99\n- Rest of World: 10-15 business days - $24.99\n\n**IMPORTANT NOTES:**\n- Orders process within 1-2 business days\n- You'll receive tracking once your order ships\n- International customers are responsible for any customs duties or taxes\n- Free domestic shipping on orders over $50\n\nWould you like specific shipping estimates for your location or have questions about a current order?",
+      "language": "en",
+      "length": 743
+    }
+  ],
+  "total": 2
+}

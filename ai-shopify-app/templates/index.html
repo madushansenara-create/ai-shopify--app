@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Customer Service for Shopify Stores | 24/7 Support</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 - 专门给Shopify店主看 -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-robot"></i>
+                    <i class="fab fa-shopify shopify-icon"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>AI Customer Service</h1>
+                    <p class="subtitle">For Shopify Stores</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status">
+                    <span class="dot"></span>
+                    <span>24/7 Online</span>
+                </div>
+                <div class="price-badge">
+                    <span class="price">$99<span class="month">/month</span></span>
+                    <small>Free 30-day trial</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 欢迎区域 -->
+        <div class="welcome-section">
+            <div class="welcome-card">
+                <h2><i class="fas fa-star"></i> Welcome Shopify Store Owner!</h2>
+                <p>This is how your customers will see your AI customer service assistant.</p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <i class="fas fa-shipping-fast"></i>
+                        <h4>Order Tracking</h4>
+                        <p>Automatically answer "Where's my order?" questions</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-undo"></i>
+                        <h4>Returns & Refunds</h4>
+                        <p>Explain your return policy 24/7</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-box"></i>
+                        <h4>Product Info</h4>
+                        <p>Answer questions about products, sizes, availability</p>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-globe"></i>
+                        <h4>Multi-language</h4>
+                        <p>Support customers worldwide</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 聊天演示区域 -->
+        <div class="demo-section">
+            <h3><i class="fas fa-comments"></i> Live Demo - Try it yourself!</h3>
+            <p class="demo-subtitle">This is exactly how it will work on your Shopify store</p>
+            
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="chat-store-info">
+                        <i class="fas fa-store"></i>
+                        <div>
+                            <strong>Your Store Name</strong>
+                            <small>Customer Support</small>
+                        </div>
+                    </div>
+                    <div class="chat-time">
+                        <i class="far fa-clock"></i>
+                        <span>Response time: Instant</span>
+                    </div>
+                </div>
+                
+                <div class="messages" id="messageContainer">
+                    <!-- 初始欢迎消息 -->
+                    <div class="message bot">
+                        <div class="avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="content">
+                            <p>👋 Hello! I'm your AI customer service assistant for <strong>[Your Store Name]</strong>.</p>
+                            <p>I'm here to help you 24/7 with:</p>
+                            <ul>
+                                <li><i class="fas fa-box"></i> Order status and tracking</li>
+                                <li><i class="fas fa-undo"></i> Return and refund policies</li>
+                                <li><i class="fas fa-shipping-fast"></i> Shipping information</li>
+                                <li><i class="fas fa-tag"></i> Product questions</li>
+                                <li><i class="fas fa-clock"></i> Store hours and contact info</li>
+                            </ul>
+                            <p>What can I help you with today?</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 快捷按钮 -->
+                <div class="quick-buttons">
+                    <h4><i class="fas fa-bolt"></i> Common Questions:</h4>
+                    <div class="button-grid">
+                        <button class="quick-btn" data-text="Where is my order?">
+                            <i class="fas fa-map-marker-alt"></i> Track Order
+                        </button>
+                        <button class="quick-btn" data-text="What's your return policy?">
+                            <i class="fas fa-undo"></i> Return Policy
+                        </button>
+                        <button class="quick-btn" data-text="How long does shipping take to USA?">
+                            <i class="fas fa-shipping-fast"></i> Shipping Time
+                        </button>
+                        <button class="quick-btn" data-text="Do you ship to Canada?">
+                            <i class="fas fa-globe"></i> International
+                        </button>
+                        <button class="quick-btn" data-text="Do you have this in size Large?">
+                            <i class="fas fa-tshirt"></i> Size Availability
+                        </button>
+                        <button class="quick-btn" data-text="What are your business hours?">
+                            <i class="far fa-clock"></i> Store Hours
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 输入区域 -->
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <input type="text" id="messageInput" placeholder="Type your question here (e.g., 'Where is my order?')...">
+                        <button id="sendButton">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                    </div>
+                    <p class="input-note"><i class="fas fa-info-circle"></i> This is a live demo. The AI will respond just like it will on your actual store.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 店主信息区域 -->
+        <div class="owner-section">
+            <div class="owner-card">
+                <h3><i class="fas fa-crown"></i> For Shopify Store Owners</h3>
+                <div class="owner-content">
+                    <div class="owner-benefits">
+                        <h4><i class="fas fa-check-circle"></i> Benefits for Your Store:</h4>
+                        <ul>
+                            <li><strong>Save 20+ hours/month</strong> on customer service</li>
+                            <li><strong>24/7 support</strong> for international customers</li>
+                            <li><strong>Reduce abandoned carts</strong> with instant replies</li>
+                            <li><strong>Professional image</strong> with always-available support</li>
+                            <li><strong>Easy Shopify integration</strong> - 5 minute setup</li>
+                        </ul>
+                    </div>
+                    <div class="owner-cta">
+                        <div class="pricing">
+                            <div class="price-display">
+                                <span class="old-price">$299/month</span>
+                                <span class="new-price">$99<span>/month</span></span>
+                                <p class="save">Save 67% - Launch Special</p>
+                            </div>
+                            <div class="trial-offer">
+                                <h5><i class="fas fa-gift"></i> Special Offer</h5>
+                                <p>First 30 days completely FREE</p>
+                                <p>No credit card required</p>
+                                <button class="cta-button" onclick="window.open('https://calendly.com/your-link', '_blank')">
+                                    <i class="fas fa-calendar-check"></i> Book Free Setup Call
+                                </button>
+                                <p class="small">I'll install it for you - No technical skills needed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计 -->
+        <div class="stats">
+            <div class="stat">
+                <i class="fas fa-user-clock"></i>
+                <span id="hoursSaved">0</span>
+                <small>Hours saved for store owners</small>
+            </div>
+            <div class="stat">
+                <i class="fas fa-comment-dots"></i>
+                <span id="questionsAnswered">0</span>
+                <small>Questions answered</small>
+            </div>
+            <div class="stat">
+                <i class="fas fa-store"></i>
+                <span>50+</span>
+                <small>Shopify stores using</small>
+            </div>
+            <div class="stat">
+                <i class="fas fa-thumbs-up"></i>
+                <span>4.9</span>
+                <small>Average rating</small>
+            </div>
+        </div>
+
+        <!-- 联系信息 -->
+        <div class="footer">
+            <p><i class="fas fa-envelope"></i> For Shopify store owners: <a href="mailto:shopify@example.com">shopify@example.com</a></p>
+            <p><i class="fab fa-shopify"></i> Shopify App coming soon to App Store</p>
+            <p class="copyright">© 2024 AI Customer Service for Shopify | Made specifically for e-commerce stores</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>

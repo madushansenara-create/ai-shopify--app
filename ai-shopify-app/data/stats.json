@@ -1,0 +1,22 @@
+{
+  "total_chats": 2,
+  "total_messages": 4,
+  "total_words": 239,
+  "languages": {
+    "en": 2,
+    "es": 0,
+    "fr": 0,
+    "de": 0,
+    "zh": 0
+  },
+  "categories": {
+    "order": 1,
+    "shipping": 0,
+    "return": 1,
+    "product": 0,
+    "policy": 0,
+    "other": 0
+  },
+  "response_times": [],
+  "last_updated": "2026-04-08T20:28:52.693534"
+}
