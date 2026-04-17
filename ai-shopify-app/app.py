@@ -594,3 +594,272 @@ if __name__ == '__main__':
         port=5000,
         threaded=True  # 支持多线程
     )
+import json
+import os
+from datetime import datetime
+import hashlib
+
+# 商家管理相关函数
+def get_merchant_config(merchant_id):
+    """获取商家配置"""
+    config_path = f"data/merchants/{merchant_id}.json"
+    if os.path.exists(config_path):
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return None
+
+def save_merchant_config(merchant_id, config):
+    """保存商家配置"""
+    # 确保目录存在
+    os.makedirs("data/merchants", exist_ok=True)
+    
+    config_path = f"data/merchants/{merchant_id}.json"
+    config['updated_at'] = datetime.now().isoformat()
+    
+    with open(config_path, 'w', encoding='utf-8') as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+    
+    return True
+
+def create_merchant_account(shop_name, email, category="general"):
+    """创建新商家账户"""
+    merchant_id = hashlib.md5(f"{email}{datetime.now()}".encode()).hexdigest()[:12]
+    
+    # 加载品类模板
+    template_path = f"data/templates/{category}.json"
+    if os.path.exists(template_path):
+        with open(template_path, 'r', encoding='utf-8') as f:
+            template = json.load(f)
+    else:
+        # 默认模板
+        template = {
+            "product_categories": ["默认品类"],
+            "shipping_info": {
+                "domestic": "3-5个工作日",
+                "international": "7-14个工作日",
+                "free_shipping_threshold": "订单满$50包邮"
+            },
+            "return_policy": "30天无条件退货",
+            "faq": [],
+            "specific_products": []
+        }
+    
+    # 创建商家配置
+    merchant_config = {
+        "merchant_id": merchant_id,
+        "shop_name": shop_name,
+        "contact_email": email,
+        "category": category,
+        "subscription_plan": "trial",
+        "created_at": datetime.now().isoformat(),
+        "custom_knowledge": template,
+        "ai_settings": {
+            "language": "zh",
+            "tone": "友好专业",
+            "response_length": "medium",
+            "enable_product_recommendations": True
+        }
+    }
+    
+    save_merchant_config(merchant_id, merchant_config)
+    return merchant_id
+
+# 增强的聊天函数 - 使用商家自定义知识库
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    try:
+        data = request.json
+        user_message = data.get('message', '').strip().lower()
+        merchant_id = data.get('merchant_id', 'default')
+        language = data.get('language', 'zh')
+        
+        # 获取商家配置
+        merchant_config = get_merchant_config(merchant_id)
+        
+        # 第一步：检查商家自定义知识库
+        if merchant_config and 'custom_knowledge' in merchant_config:
+            custom_kb = merchant_config['custom_knowledge']
+            
+            # 检查FAQ
+            if 'faq' in custom_kb:
+                for faq_item in custom_kb['faq']:
+                    if faq_item['question'].lower() in user_message:
+                        return jsonify({
+                            'response': faq_item['answer'],
+                            'source': 'custom_faq',
+                            'merchant_id': merchant_id
+                        })
+            
+            # 检查退货政策
+            if 'return' in user_message and 'return_policy' in custom_kb:
+                return jsonify({
+                    'response': custom_kb['return_policy'],
+                    'source': 'custom_return_policy',
+                    'merchant_id': merchant_id
+                })
+            
+            # 检查配送信息
+            shipping_keywords = ['shipping', 'delivery', '配送', '发货', '多久']
+            if any(keyword in user_message for keyword in shipping_keywords) and 'shipping_info' in custom_kb:
+                shipping_info = custom_kb['shipping_info']
+                response = f"国内配送：{shipping_info.get('domestic', '3-5个工作日')}\n"
+                response += f"国际配送：{shipping_info.get('international', '7-14个工作日')}\n"
+                if 'free_shipping_threshold' in shipping_info:
+                    response += f"包邮政策：{shipping_info['free_shipping_threshold']}"
+                
+                return jsonify({
+                    'response': response,
+                    'source': 'custom_shipping_info',
+                    'merchant_id': merchant_id
+                })
+        
+        # 第二步：检查通用知识库
+        knowledge_base = ENGLISH_KNOWLEDGE_BASE if language == 'en' else KNOWLEDGE_BASE
+        
+        for keyword, responses in knowledge_base.items():
+            if keyword in user_message:
+                if isinstance(responses, dict):
+                    for sub_key, response in responses.items():
+                        if sub_key in user_message:
+                            return jsonify({
+                                'response': response,
+                                'source': 'general_knowledge',
+                                'merchant_id': merchant_id
+                            })
+                else:
+                    return jsonify({
+                        'response': responses,
+                        'source': 'general_knowledge',
+                        'merchant_id': merchant_id
+                    })
+        
+        # 第三步：调用DeepSeek API，使用商家上下文
+        if DEEPSEEK_API_KEY:
+            headers = {
+                'Authorization': f'Bearer {DEEPSEEK_API_KEY}',
+                'Content-Type': 'application/json'
+            }
+            
+            # 构建商家特定的上下文
+            context = "You are a customer service assistant for an e-commerce store."
+            if merchant_config:
+                shop_name = merchant_config.get('shop_name', 'an e-commerce store')
+                categories = merchant_config.get('custom_knowledge', {}).get('product_categories', ['products'])
+                context = f"You are a customer service assistant for {shop_name} which sells {', '.join(categories)}."
+            
+            data = {
+                'model': 'deepseek-chat',
+                'messages': [
+                    {'role': 'system', 'content': context},
+                    {'role': 'user', 'content': user_message}
+                ],
+                'max_tokens': 200,
+                'temperature': 0.7
+            }
+            
+            response = requests.post(
+                'https://api.deepseek.com/v1/chat/completions',
+                headers=headers,
+                json=data,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                ai_response = result['choices'][0]['message']['content']
+                return jsonify({
+                    'response': ai_response,
+                    'source': 'deepseek_ai',
+                    'merchant_id': merchant_id
+                })
+        
+        # 默认回答
+        default_responses = {
+            'en': "Hello! I'm your AI customer service assistant. How can I help you today?",
+            'zh': "您好！我是您的AI客服助手。请问有什么可以帮助您的？"
+        }
+        
+        return jsonify({
+            'response': default_responses.get(language, default_responses['zh']),
+            'source': 'default',
+            'merchant_id': merchant_id
+        })
+        
+    except Exception as e:
+        print(f"Chat error: {str(e)}")
+        error_messages = {
+            'en': "Sorry, we encountered an error. Please try again later.",
+            'zh': "抱歉，处理您的请求时出现错误。请稍后重试。"
+        }
+        return jsonify({
+            'response': error_messages.get(language, error_messages['zh']),
+            'error': str(e)
+        }), 500
+
+# 商家管理API
+@app.route('/api/merchant/register', methods=['POST'])
+def merchant_register():
+    """商家注册"""
+    try:
+        data = request.json
+        shop_name = data.get('shop_name')
+        email = data.get('email')
+        category = data.get('category', 'general')
+        
+        if not shop_name or not email:
+            return jsonify({'error': 'Missing required fields'}), 400
+        
+        merchant_id = create_merchant_account(shop_name, email, category)
+        
+        return jsonify({
+            'success': True,
+            'merchant_id': merchant_id,
+            'message': 'Merchant account created successfully'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/merchant/config', methods=['GET', 'POST'])
+def merchant_config():
+    """获取或更新商家配置"""
+    merchant_id = request.args.get('merchant_id') or request.json.get('merchant_id')
+    
+    if not merchant_id:
+        return jsonify({'error': 'Merchant ID required'}), 400
+    
+    if request.method == 'GET':
+        config = get_merchant_config(merchant_id)
+        if config:
+            return jsonify(config)
+        return jsonify({'error': 'Merchant not found'}), 404
+    
+    else:  # POST
+        config = request.json.get('config')
+        if not config:
+            return jsonify({'error': 'Config data required'}), 400
+        
+        success = save_merchant_config(merchant_id, config)
+        return jsonify({'success': success})
+
+# 添加新的路由
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+@app.route('/merchant/dashboard')
+def merchant_dashboard():
+    return render_template('merchant_dashboard.html')
+
+@app.route('/faq')
+def faq():
+    return render_template('faq.html')
+    
