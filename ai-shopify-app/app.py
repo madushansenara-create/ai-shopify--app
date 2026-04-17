@@ -442,62 +442,159 @@ def home():
         session.permanent = True
     
     return render_template('index.html')
-
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    """处理聊天消息 - 主接口"""
-    start_time = time.time()
-    
+    """处理聊天消息 - 增强版，支持商家自定义"""
     try:
-        # 获取请求数据
         data = request.json
-        if not data:
-            return jsonify({
-                "success": False,
-                "error": "No data provided",
-                "response": "Please provide a message."
-            }), 400
+        user_message = data.get('message', '').strip().lower()
+        merchant_id = data.get('merchant_id', 'default')
+        language = data.get('language', 'zh')
         
-        message = data.get('message', '').strip()
-        if not message:
-            return jsonify({
-                "success": False,
-                "error": "Empty message",
-                "response": "Please type a message."
-            }), 400
+        # 获取商家配置
+        merchant_config = get_merchant_config(merchant_id)
         
-        # 获取用户ID
-        user_id = session.get('user_id', 'anonymous')
+        # 第一步：检查商家自定义知识库
+        if merchant_config and 'custom_knowledge' in merchant_config:
+            custom_kb = merchant_config['custom_knowledge']
+            
+            # 检查FAQ
+            if 'faq' in custom_kb:
+                for faq_item in custom_kb['faq']:
+                    if isinstance(faq_item, dict) and 'question' in faq_item:
+                        if faq_item['question'].lower() in user_message:
+                            return jsonify({
+                                'response': faq_item.get('answer', ''),
+                                'source': 'custom_faq',
+                                'merchant_id': merchant_id
+                            })
+            
+            # 检查退货政策
+            return_keywords = ['return', 'refund', 'exchange', '退货', '退款', '换货']
+            if any(keyword in user_message for keyword in return_keywords):
+                if 'return_policy' in custom_kb:
+                    return jsonify({
+                        'response': custom_kb['return_policy'],
+                        'source': 'custom_return_policy',
+                        'merchant_id': merchant_id
+                    })
+            
+            # 检查配送信息
+            shipping_keywords = ['shipping', 'delivery', 'ship', '配送', '发货', '多久', '时间', '到达']
+            if any(keyword in user_message for keyword in shipping_keywords):
+                if 'shipping_info' in custom_kb:
+                    shipping_info = custom_kb['shipping_info']
+                    response = f"国内配送：{shipping_info.get('domestic', '3-5个工作日')}\n"
+                    response += f"国际配送：{shipping_info.get('international', '7-14个工作日')}\n"
+                    if 'free_shipping_threshold' in shipping_info:
+                        response += f"包邮政策：{shipping_info['free_shipping_threshold']}"
+                    
+                    return jsonify({
+                        'response': response,
+                        'source': 'custom_shipping_info',
+                        'merchant_id': merchant_id
+                    })
+            
+            # 检查产品信息
+            product_keywords = ['product', 'item', '商品', '产品', '什么', '哪个']
+            if any(keyword in user_message for keyword in product_keywords):
+                if 'specific_products' in custom_kb and custom_kb['specific_products']:
+                    products = custom_kb['specific_products']
+                    response = "我们有以下产品：\n"
+                    for product in products[:3]:  # 最多显示3个
+                        if isinstance(product, dict):
+                            name = product.get('name', '')
+                            desc = product.get('description', '')
+                            price = product.get('price', '')
+                            response += f"• {name} - {desc} - {price}\n"
+                    
+                    return jsonify({
+                        'response': response,
+                        'source': 'custom_products',
+                        'merchant_id': merchant_id
+                    })
         
-        # 检测语言
-        language = AIChatEngine.detect_language(message)
+        # 第二步：检查通用知识库
+        knowledge_base = ENGLISH_KNOWLEDGE_BASE if language == 'en' else KNOWLEDGE_BASE
         
-        # 与AI对话
-        ai_result = AIChatEngine.chat_with_ai(message, language)
+        for keyword, responses in knowledge_base.items():
+            if keyword in user_message:
+                if isinstance(responses, dict):
+                    for sub_key, response in responses.items():
+                        if sub_key in user_message:
+                            return jsonify({
+                                'response': response,
+                                'source': 'general_knowledge',
+                                'merchant_id': merchant_id
+                            })
+                else:
+                    return jsonify({
+                        'response': responses,
+                        'source': 'general_knowledge',
+                        'merchant_id': merchant_id
+                    })
         
-        # 保存聊天记录
-        if ai_result.get("success"):
-            DataManager.save_chat(user_id, message, ai_result["response"], language)
+        # 第三步：调用DeepSeek API，使用商家上下文
+        if DEEPSEEK_API_KEY:
+            headers = {
+                'Authorization': f'Bearer {DEEPSEEK_API_KEY}',
+                'Content-Type': 'application/json'
+            }
+            
+            # 构建商家特定的上下文
+            context = "You are a customer service assistant for an e-commerce store."
+            if merchant_config:
+                shop_name = merchant_config.get('shop_name', 'an e-commerce store')
+                categories = merchant_config.get('custom_knowledge', {}).get('product_categories', ['products'])
+                context = f"You are a customer service assistant for {shop_name} which sells {', '.join(categories)}."
+            
+            data = {
+                'model': 'deepseek-chat',
+                'messages': [
+                    {'role': 'system', 'content': context},
+                    {'role': 'user', 'content': user_message}
+                ],
+                'max_tokens': 200,
+                'temperature': 0.7
+            }
+            
+            response = requests.post(
+                'https://api.deepseek.com/v1/chat/completions',
+                headers=headers,
+                json=data,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                ai_response = result['choices'][0]['message']['content']
+                return jsonify({
+                    'response': ai_response,
+                    'source': 'deepseek_ai',
+                    'merchant_id': merchant_id
+                })
         
-        # 准备响应
-        response_data = {
-            "success": ai_result.get("success", False),
-            "response": ai_result.get("response", "Error processing request"),
-            "language": language,
-            "response_time": ai_result.get("response_time", round(time.time() - start_time, 2)),
-            "tokens_used": ai_result.get("tokens_used", 0),
-            "model": ai_result.get("model", "unknown"),
-            "user_id": user_id[:6] + "..."  # 部分用户ID用于显示
+        # 默认回答
+        default_responses = {
+            'en': "Hello! I'm your AI customer service assistant. How can I help you today?",
+            'zh': "您好！我是您的AI客服助手。请问有什么可以帮助您的？"
         }
         
-        return jsonify(response_data)
+        return jsonify({
+            'response': default_responses.get(language, default_responses['zh']),
+            'source': 'default',
+            'merchant_id': merchant_id
+        })
         
     except Exception as e:
+        print(f"Chat error: {str(e)}")
+        error_messages = {
+            'en': "Sorry, we encountered an error. Please try again later.",
+            'zh': "抱歉，处理您的请求时出现错误。请稍后重试。"
+        }
         return jsonify({
-            "success": False,
-            "response": "System error occurred. Please try again.",
-            "error": str(e),
-            "response_time": round(time.time() - start_time, 2)
+            'response': error_messages.get(language, error_messages['zh']),
+            'error': str(e)
         }), 500
 
 @app.route('/api/stats')
