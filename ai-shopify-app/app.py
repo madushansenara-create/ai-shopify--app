@@ -15,6 +15,10 @@ from datetime import datetime, timedelta
 import hashlib
 from typing import Dict, List, Optional
 import re
+# ==================== 新增的导入 ====================
+import hashlib
+import uuid
+from pathlib import Path
 
 # ==================== 初始化 ====================
 app = Flask(__name__)
