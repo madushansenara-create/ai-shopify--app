@@ -50,6 +50,83 @@ class Config:
     PRODUCTS_FILE = os.path.join(DATA_DIR, "products.json")
 
 config = Config()
+# ==================== 新增：商家管理配置 ====================
+# 数据存储路径
+DATA_DIR = Path("data")
+MERCHANTS_DIR = DATA_DIR / "merchants"
+TEMPLATES_DIR = DATA_DIR / "templates"
+LOGS_DIR = DATA_DIR / "logs"
+
+# 创建必要的目录
+for directory in [DATA_DIR, MERCHANTS_DIR, TEMPLATES_DIR, LOGS_DIR]:
+    directory.mkdir(exist_ok=True)
+
+# 加载品类模板
+def load_category_template(category):
+    """加载品类模板"""
+    template_path = TEMPLATES_DIR / f"{category}.json"
+    if template_path.exists():
+        with open(template_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    else:
+        # 默认模板
+        return {
+            "product_categories": ["默认品类"],
+            "shipping_info": {
+                "domestic": "3-5个工作日",
+                "international": "7-14个工作日",
+                "free_shipping_threshold": "订单满$50包邮"
+            },
+            "return_policy": "30天无条件退货",
+            "faq": [],
+            "specific_products": []
+        }
+
+# 商家管理函数
+def get_merchant_config(merchant_id):
+    """获取商家配置"""
+    config_path = MERCHANTS_DIR / f"{merchant_id}.json"
+    if config_path.exists():
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return None
+
+def save_merchant_config(merchant_id, config):
+    """保存商家配置"""
+    config_path = MERCHANTS_DIR / f"{merchant_id}.json"
+    config['updated_at'] = datetime.now().isoformat()
+    
+    with open(config_path, 'w', encoding='utf-8') as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+    
+    return True
+
+def create_merchant_account(shop_name, email, category="general"):
+    """创建新商家账户"""
+    merchant_id = hashlib.md5(f"{email}{datetime.now()}".encode()).hexdigest()[:12]
+    
+    # 获取品类模板
+    template = load_category_template(category)
+    
+    # 创建商家配置
+    merchant_config = {
+        "merchant_id": merchant_id,
+        "shop_name": shop_name,
+        "contact_email": email,
+        "category": category,
+        "subscription_plan": "trial",
+        "created_at": datetime.now().isoformat(),
+        "custom_knowledge": template,
+        "ai_settings": {
+            "language": "zh",
+            "tone": "友好专业",
+            "response_length": "medium",
+            "enable_product_recommendations": True
+        }
+    }
+    
+    save_merchant_config(merchant_id, merchant_config)
+    return merchant_id
 
 # ==================== 数据管理 ====================
 class DataManager:
