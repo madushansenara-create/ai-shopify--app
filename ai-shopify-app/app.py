@@ -974,10 +974,10 @@ def chat():
             'error': str(e)
         }), 500
 
-# 商家管理API
+# ==================== 新增：商家管理API ====================
 @app.route('/api/merchant/register', methods=['POST'])
 def merchant_register():
-    """商家注册"""
+    """商家注册API"""
     try:
         data = request.json
         shop_name = data.get('shop_name')
@@ -985,59 +985,115 @@ def merchant_register():
         category = data.get('category', 'general')
         
         if not shop_name or not email:
-            return jsonify({'error': 'Missing required fields'}), 400
+            return jsonify({'error': 'Missing required fields: shop_name and email'}), 400
         
         merchant_id = create_merchant_account(shop_name, email, category)
         
         return jsonify({
             'success': True,
             'merchant_id': merchant_id,
-            'message': 'Merchant account created successfully'
+            'message': '商家账户创建成功',
+            'dashboard_url': f'/merchant/dashboard?merchant_id={merchant_id}'
         })
         
     except Exception as e:
+        print(f"Merchant registration error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/merchant/config', methods=['GET', 'POST'])
 def merchant_config():
     """获取或更新商家配置"""
-    merchant_id = request.args.get('merchant_id') or request.json.get('merchant_id')
-    
-    if not merchant_id:
-        return jsonify({'error': 'Merchant ID required'}), 400
-    
-    if request.method == 'GET':
-        config = get_merchant_config(merchant_id)
-        if config:
-            return jsonify(config)
-        return jsonify({'error': 'Merchant not found'}), 404
-    
-    else:  # POST
-        config = request.json.get('config')
-        if not config:
-            return jsonify({'error': 'Config data required'}), 400
+    try:
+        merchant_id = request.args.get('merchant_id') or request.json.get('merchant_id')
         
-        success = save_merchant_config(merchant_id, config)
-        return jsonify({'success': success})
+        if not merchant_id:
+            return jsonify({'error': '需要商家ID (merchant_id)'}), 400
+        
+        if request.method == 'GET':
+            config = get_merchant_config(merchant_id)
+            if config:
+                return jsonify(config)
+            return jsonify({'error': '商家不存在'}), 404
+        
+        else:  # POST
+            config = request.json.get('config')
+            if not config:
+                return jsonify({'error': '需要配置数据'}), 400
+            
+            success = save_merchant_config(merchant_id, config)
+            return jsonify({'success': success, 'message': '配置已保存'})
+            
+    except Exception as e:
+        print(f"Merchant config error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
-# 添加新的路由
+@app.route('/api/merchant/test', methods=['GET'])
+def merchant_test():
+    """商家配置测试接口"""
+    test_id = "test_merchant_001"
+    test_config = {
+        "merchant_id": test_id,
+        "shop_name": "测试店铺",
+        "custom_knowledge": {
+            "faq": [
+                {"question": "测试问题", "answer": "测试回答"}
+            ]
+        }
+    }
+    
+    save_merchant_config(test_id, test_config)
+    loaded = get_merchant_config(test_id)
+    
+    return jsonify({
+        'success': True,
+        'saved': test_config,
+        'loaded': loaded
+    })
+
+# ==================== 新增：法律页面路由 ====================
 @app.route('/privacy')
 def privacy():
+    """隐私政策页面"""
     return render_template('privacy.html')
 
 @app.route('/terms')
 def terms():
+    """服务条款页面"""
     return render_template('terms.html')
 
 @app.route('/contact')
 def contact():
+    """联系信息页面"""
     return render_template('contact.html')
 
 @app.route('/merchant/dashboard')
 def merchant_dashboard():
+    """商家后台管理页面"""
     return render_template('merchant_dashboard.html')
 
 @app.route('/faq')
 def faq():
+    """常见问题页面"""
     return render_template('faq.html')
-    
+
+@app.route('/pricing')
+def pricing():
+    """定价页面"""
+    return render_template('pricing.html')
+
+@app.route('/landing')
+def landing():
+    """营销落地页"""
+    return render_template('landing.html')
+
+# ==================== 新增：健康检查路由 ====================
+@app.route('/api/merchant/health', methods=['GET'])
+def merchant_health():
+    """商家系统健康检查"""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'Shopify AI Pro Merchant System',
+        'data_dir_exists': DATA_DIR.exists(),
+        'merchants_count': len(list(MERCHANTS_DIR.glob('*.json'))),
+        'timestamp': datetime.now().isoformat()
+    })
