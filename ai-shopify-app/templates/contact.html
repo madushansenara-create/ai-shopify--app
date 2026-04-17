@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联系我们 - Shopify AI Pro</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container" style="max-width: 800px; padding: 40px;">
+        <header style="text-align: center; margin-bottom: 40px;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 10px;">联系我们</h1>
+            <p style="color: #666;">我们随时准备为您提供帮助</p>
+        </header>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
+            <!-- 联系卡片 -->
+            <div style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: center;">
+                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #0066ff 0%, #00c9a7 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;">
+                    📧
+                </div>
+                <h3 style="margin-bottom: 10px;">3278216040@qq.com</h3>
+                <p style="color: #666; margin-bottom: 15px;">一般咨询</p>
+                <a href="mailto:support@shopify-ai-pro.com" style="color: #0066ff; font-weight: 600;">support@shopify-ai-pro.com</a>
+                <p style="font-size: 0.9rem; color: #999; margin-top: 10px;">响应时间：24小时内</p>
+            </div>
+            
+            <div style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: center;">
+                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #0066ff 0%, #00c9a7 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;">
+                    ⚖️
+                </div>
+                <h3 style="margin-bottom: 10px;">法律事务</h3>
+                <p style="color: #666; margin-bottom: 15px;">隐私、条款相关问题</p>
+                <a href="mailto:legal@shopify-ai-pro.com" style="color: #0066ff; font-weight: 600;">legal@shopify-ai-pro.com</a>
+            </div>
+            
+            <div style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: center;">
+                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #0066ff 0%, #00c9a7 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;">
+                    💰
+                </div>
+                <h3 style="margin-bottom: 10px;">销售咨询</h3>
+                <p style="color: #666; margin-bottom: 15px;">企业版、定制方案</p>
+                <a href="mailto:sales@shopify-ai-pro.com" style="color: #0066ff; font-weight: 600;">sales@shopify-ai-pro.com</a>
+            </div>
+            
+            <div style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: center;">
+                <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #0066ff 0%, #00c9a7 100%); border-radius: 12px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: white;">
+                    🆘
+                </div>
+                <h3 style="margin-bottom: 10px;">技术支持</h3>
+                <p style="color: #666; margin-bottom: 15px;">技术问题、API集成</p>
+                <a href="mailto:tech@shopify-ai-pro.com" style="color: #0066ff; font-weight: 600;">tech@shopify-ai-pro.com</a>
+            </div>
+        </div>
+        
+        <!-- 联系表单 -->
+        <div style="background: white; border-radius: 15px; padding: 40px; box-shadow: 0 5px 20px rgba(0,0,0,0.05);">
+            <h2 style="margin-bottom: 30px; text-align: center;">发送消息</h2>
+            
+            <form id="contactForm" style="max-width: 500px; margin: 0 auto;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">姓名</label>
+                    <input type="text" required style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">邮箱</label>
+                    <input type="email" required style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">主题</label>
+                    <select style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                        <option value="">选择主题</option>
+                        <option value="general">一般咨询</option>
+                        <option value="support">技术支持</option>
+                        <option value="billing">账单问题</option>
+                        <option value="legal">法律事务</option>
+                        <option value="sales">销售咨询</option>
+                        <option value="feedback">产品反馈</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">消息</label>
+                    <textarea rows="6" required style="width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
+                </div>
+                
+                <button type="submit" style="width: 100%; background: linear-gradient(135deg, #0066ff 0%, #00c9a7 100%); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                    发送消息
+                </button>
+            </form>
+            
+            <div id="formSuccess" style="display: none; text-align: center; margin-top: 20px; padding: 15px; background: #d4edda; color: #155724; border-radius: 8px;">
+                消息发送成功！我们将在24小时内回复您。
+            </div>
+        </div>
+        
+        <!-- 其他信息 -->
+        <div style="margin-top: 40px; text-align: center; color: #666;">
+            <h3 style="margin-bottom: 15px;">其他信息</h3>
+            <p style="margin-bottom: 10px;"><strong>办公时间：</strong>周一至周五 9:00-18:00 (UTC+8)</p>
+            <p style="margin-bottom: 10px;"><strong>紧急支持：</strong>7x24小时技术故障响应</p>
+            <p style="margin-bottom: 10px;"><strong>响应时间承诺：</strong>一般咨询24小时内，紧急问题2小时内</p>
+        </div>
+        
+        <footer style="text-align: center; margin-top: 40px; color: #666; font-size: 0.9rem;">
+            <p>© 2024 Shopify AI Pro. 保留所有权利。</p>
+            <p style="margin-top: 10px;">
+                <a href="/privacy" style="color: #666; margin: 0 10px;">隐私政策</a> | 
+                <a href="/terms" style="color: #666; margin: 0 10px;">服务条款</a> | 
+                <a href="/faq" style="color: #666; margin: 0 10px;">常见问题</a>
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // 这里可以添加实际的表单提交逻辑
+            document.getElementById('formSuccess').style.display = 'block';
+            this.reset();
+            setTimeout(() => {
+                document.getElementById('formSuccess').style.display = 'none';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
